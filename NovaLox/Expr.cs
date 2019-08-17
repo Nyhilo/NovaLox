@@ -4,7 +4,18 @@ using System;
 namespace NovaLox
 {
 
-    public abstract class Expr { }
+    public abstract class Expr {
+        public abstract R Accept<R>(IVisitor<R> visitor);
+    }
+
+
+    public interface IVisitor<R> {
+        R VisitBinaryExpr(Binary expr);
+        R VisitGroupingExpr(Grouping expr);
+        R VisitLiteralExpr(Literal expr);
+        R VisitUnaryExpr(Unary expr);
+    }
+
 
     public class Binary
     {
@@ -18,6 +29,11 @@ namespace NovaLox
             this.Operator = _operator;
             this.Right = _right;
         }
+
+        public R Accept<R>(IVisitor<R> visitor)
+        {
+            return visitor.VisitBinaryExpr(this);
+        }
     }
 
     public class Grouping
@@ -28,6 +44,11 @@ namespace NovaLox
         {
             this.Expression = _expression;
         }
+
+        public R Accept<R>(IVisitor<R> visitor)
+        {
+            return visitor.VisitGroupingExpr(this);
+        }
     }
 
     public class Literal
@@ -37,6 +58,11 @@ namespace NovaLox
         public Literal(Object _value)
         {
             this.Value = _value;
+        }
+
+        public R Accept<R>(IVisitor<R> visitor)
+        {
+            return visitor.VisitLiteralExpr(this);
         }
     }
 
@@ -49,6 +75,11 @@ namespace NovaLox
         {
             this.Operator = _operator;
             this.Right = _right;
+        }
+
+        public R Accept<R>(IVisitor<R> visitor)
+        {
+            return visitor.VisitUnaryExpr(this);
         }
     }
 }

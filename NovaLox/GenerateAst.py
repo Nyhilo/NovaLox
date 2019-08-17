@@ -1,4 +1,6 @@
-# Glorified dictionaries
+##############
+# Structures #
+##############
 class Ast:
     def __init__(self, name, args):
         self.Name = name
@@ -7,13 +9,37 @@ class Ast:
         else:
             self.Args = [args]
 
+    def class_properties(self):
+        return "\n".join([f"        public readonly {arg.Type} {arg.Name};" for arg in self.Args])
+
+    def ctor_parameters(self):
+        return ", ".join([f"{arg.Type} _{arg.Name.lower()}" for arg in self.Args])
+
+    def ctor_setters(self):
+        return "\n".join([f"{' '*12}this.{arg.Name} = _{arg.Name.lower()};" for arg in self.Args])
+
 
 class Arg:
     def __init__(self, _type, name):
         self.Type = _type
         self.Name = name
 
-# Globals
+
+def visitor_class(baseClass, asts):
+    interfaceMethods = "\n".join([f"        R Visit{ast.Name}{baseClass}({ast.Name} expr);" for ast in asts])
+
+    return f"""
+    public interface IVisitor<R> {{
+{interfaceMethods}
+    }}
+"""
+
+
+###########
+# Globals #
+###########
+DEBUG = False
+
 baseClass = "Expr"
 
 asts = [
@@ -32,6 +58,11 @@ asts = [
 ]
 
 
+
+###################
+# String Building #
+###################
+
 # Setup
 astfile = f"""
 using System;
@@ -39,23 +70,28 @@ using System;
 namespace NovaLox
 {{
 
-    public abstract class {baseClass} {{ }}
+    public abstract class {baseClass} {{
+        public abstract R Accept<R>(IVisitor<R> visitor);
+    }}
+
+{visitor_class(baseClass, asts)}
 """
 
 # Work
 for ast in asts:
-    classProperties = "\n".join([f"        public readonly {arg.Type} {arg.Name};" for arg in ast.Args])
-    ctorParams = ", ".join([f"{arg.Type} _{arg.Name.lower()}" for arg in ast.Args])
-    ctorSetters = "\n".join([f"{' '*12}this.{arg.Name} = _{arg.Name.lower()};" for arg in ast.Args])
-
     astfile +=f"""
     public class {ast.Name}
     {{
-{classProperties}
+{ast.class_properties()}
 
-        public {ast.Name}({ctorParams})
+        public {ast.Name}({ast.ctor_parameters()})
         {{
-{ctorSetters}
+{ast.ctor_setters()}
+        }}
+
+        public R Accept<R>(IVisitor<R> visitor)
+        {{
+            return visitor.Visit{ast.Name}{baseClass}(this);
         }}
     }}
 """
@@ -63,6 +99,13 @@ for ast in asts:
 # Finally
 astfile += "}"
 
-# And save
-with open("Expr.cs", "w+") as file:
-    file.write(astfile)
+
+###########
+# File IO #
+###########
+if __name__ == '__main__':
+    if DEBUG:
+        print(astfile)
+    else:
+        with open("Expr.cs", "w+") as file:
+            file.write(astfile)
