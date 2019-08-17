@@ -10,19 +10,20 @@ class Ast:
             self.Args = [args]
 
     def class_properties(self):
-        return "\n".join([f"        public readonly {arg.Type} {arg.Name};" for arg in self.Args])
+        return "\n".join([f"        public {arg.Type} {arg.Name} {{ get; }}" for arg in self.Args])
 
     def ctor_parameters(self):
-        return ", ".join([f"{arg.Type} _{arg.Name.lower()}" for arg in self.Args])
+        return ", ".join([f"{arg.Type} {arg.Prop}" for arg in self.Args])
 
     def ctor_setters(self):
-        return "\n".join([f"{' '*12}this.{arg.Name} = _{arg.Name.lower()};" for arg in self.Args])
+        return "\n".join([f"{' '*12}{arg.Name} = {arg.Prop};" for arg in self.Args])
 
 
 class Arg:
     def __init__(self, _type, name):
         self.Type = _type
         self.Name = name
+        self.Prop = "op" if name == "Operator" else name.lower()
 
 
 def visitor_class(baseClass, asts):
