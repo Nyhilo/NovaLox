@@ -17,7 +17,7 @@ namespace NovaLox
     }
 
 
-    public class Binary
+    public class Binary : Expr
     {
         public readonly Expr Left;
         public readonly Token Operator;
@@ -30,13 +30,13 @@ namespace NovaLox
             this.Right = _right;
         }
 
-        public R Accept<R>(IVisitor<R> visitor)
+        public override R Accept<R>(IVisitor<R> visitor)
         {
             return visitor.VisitBinaryExpr(this);
         }
     }
 
-    public class Grouping
+    public class Grouping : Expr
     {
         public readonly Expr Expression;
 
@@ -45,13 +45,13 @@ namespace NovaLox
             this.Expression = _expression;
         }
 
-        public R Accept<R>(IVisitor<R> visitor)
+        public override R Accept<R>(IVisitor<R> visitor)
         {
             return visitor.VisitGroupingExpr(this);
         }
     }
 
-    public class Literal
+    public class Literal : Expr
     {
         public readonly Object Value;
 
@@ -60,13 +60,13 @@ namespace NovaLox
             this.Value = _value;
         }
 
-        public R Accept<R>(IVisitor<R> visitor)
+        public override R Accept<R>(IVisitor<R> visitor)
         {
             return visitor.VisitLiteralExpr(this);
         }
     }
 
-    public class Unary
+    public class Unary : Expr
     {
         public readonly Token Operator;
         public readonly Expr Right;
@@ -77,7 +77,7 @@ namespace NovaLox
             this.Right = _right;
         }
 
-        public R Accept<R>(IVisitor<R> visitor)
+        public override R Accept<R>(IVisitor<R> visitor)
         {
             return visitor.VisitUnaryExpr(this);
         }

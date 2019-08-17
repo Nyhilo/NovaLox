@@ -80,7 +80,7 @@ namespace NovaLox
 # Work
 for ast in asts:
     astfile +=f"""
-    public class {ast.Name}
+    public class {ast.Name} : Expr
     {{
 {ast.class_properties()}
 
@@ -89,7 +89,7 @@ for ast in asts:
 {ast.ctor_setters()}
         }}
 
-        public R Accept<R>(IVisitor<R> visitor)
+        public override R Accept<R>(IVisitor<R> visitor)
         {{
             return visitor.Visit{ast.Name}{baseClass}(this);
         }}
