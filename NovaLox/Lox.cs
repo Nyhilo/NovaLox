@@ -63,11 +63,20 @@ namespace NovaLox
         {
             var scanner = new Scanner(source);
             var tokens = scanner.ScanTokens();
+            var parser = new Parser(tokens);
+            var expression = parser.Parse();
 
-            foreach (var token in tokens)
-            {
-                Console.WriteLine(token);
-            }
+            // Stop if there was a syntax error
+            if (ErrorOccured)
+                return;
+
+            Console.WriteLine(new AstPrinter().Print(expression));
+        }
+
+        private static void Report(int line, string where, string message)
+        {
+            Console.Error.WriteLine(String.Format("[line {0}] Error{1}: {2}", line, where, message));
+            ErrorOccured = true;
         }
 
         public static void Error(int line, string message)
@@ -75,10 +84,12 @@ namespace NovaLox
             Report(line, "", message);
         }
 
-        private static void Report(int line, string where, string message)
+        internal static void Error(Token token, string message)
         {
-            Console.Error.WriteLine(String.Format("[line {0}] Error{1}: {2}", line, where, message));
-            ErrorOccured = true;
+            if (token.Type == TokenType.EOF)
+                Report(token.Line, " at end", message);
+            else
+                Report(token.Line, " at '" + token.Lexeme + "'", message);
         }
     }
 }
